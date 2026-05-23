@@ -1,0 +1,23 @@
+version: 1
+# source is used by /pull to pull updates from an upstream template repo.
+# dotagent is the reference implementation — there is no upstream above it.
+
+agents:
+  - claude
+  - augment
+
+mode: solid
+mode-note: >
+  Reference implementation. This repo is the spec made real.
+  Correctness and coherence take priority over velocity.
+  Every command must behave exactly as documented — if it doesn't,
+  the documentation is wrong, not the behavior.
+
+targets:
+  .claude:
+    rules:    .dotagent/rules
+    skills:   .dotagent/skills
+    commands: .dotagent/commands
+  .augment:
+    rules:    .dotagent/rules
+    skills:   .dotagent/skills

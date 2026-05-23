@@ -147,4 +147,4 @@ The full concept, design decisions, and command specifications are in [SPEC.md](
 
 ## License
 
-MIT
+[MIT](LICENSE)

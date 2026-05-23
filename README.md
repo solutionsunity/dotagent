@@ -30,21 +30,16 @@ Your agent configuration lives in one place — `.dotagent` — and is linked in
 
 ## Quickstart
 
-Clone the repo into your project:
-
-```bash
-git clone https://github.com/solutionsunity/dotagent .dotagent
-```
-
-Then open your AI agent in the project directory and run:
+Open your AI agent in your project directory and paste this prompt:
 
 ```
-/init
+Read https://raw.githubusercontent.com/solutionsunity/dotagent/main/SPEC.md
+then run /init for this workspace.
 ```
 
-That's it. The repo ships with a `CLAUDE.md` and `.augment-guidelines` at root — each containing a single instruction that points the agent to `.dotagent/commands/init.md`. The agent reads it and the bootstrap is complete.
-
-Once `/init` runs and links are created, the agent loads everything through `.dotagent` directly. The root bootstrap files stay in place harmlessly for any future fresh clone.
+The agent reads the spec, understands the format, and walks you through initialization.
+Your `.dotagent/` is built from the conversation — nothing to clone, nothing to install.
+The prompt is the bootstrap.
 
 ---
 

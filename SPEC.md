@@ -898,28 +898,23 @@ dotagent/
       git-feature-branch.md
     commands/
       create-feature.md
-    whoami/
+    profiles/
       whoami-architect.md         # seeded from real usage
     workspaces/                   # empty — populated by real runs
 
   COMMUNITY.md                    # curated index of notable forks
+  FAQ.md                          # common questions on modes, setup, community
   SPEC.md                         # this document
   README.md                       # how-to — installation and usage
   LICENSE
 ```
 
-**Bootstrap files:**
+**Bootstrap:**
 
-The repo ships with two root-level files that solve the chicken-and-egg problem — the agent needs to know about `.dotagent/commands/init.md` before `.dotagent` is initialized:
-
-```
-CLAUDE.md              # "Read .dotagent/commands/init.md and follow it."
-.augment-guidelines    # same single instruction
-```
-
-These are the entry points for a fresh clone. Once `/init` runs and `.claude` and `.augment` are symlinked into `.dotagent`, these files become redundant — the agent loads everything through the symlinked directories. They stay in place harmlessly and serve any future fresh clone.
-
-One line. Self-eliminating after first run. Intentional, not leftovers.
+There is nothing to install. The developer pastes a single prompt into their AI agent
+pointing to `.dotagent/commands/init.md`. The agent reads the init command and walks
+through initialization. The workspace `.dotagent/` is built from the conversation — no
+cloning, no root bootstrap files required.
 
 ---
 

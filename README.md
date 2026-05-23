@@ -136,6 +136,12 @@ See [COMMUNITY.md](COMMUNITY.md) for listed community forks.
 
 ---
 
+## FAQ
+
+Common questions on modes, setup, and community — [FAQ.md](FAQ.md).
+
+---
+
 ## Design & Spec
 
 The full concept, design decisions, and command specifications are in [SPEC.md](SPEC.md). Read it before contributing. Every decision in there was made deliberately and is explained.

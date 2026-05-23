@@ -49,7 +49,7 @@ The prompt is the bootstrap.
 
 1. Detects your stack, frameworks, CI, existing config
 2. Asks which AI agents you use — gates everything downstream
-3. Asks your current project mode (`ship`, `solid`, `explore`, `maintain`, `migrate`)
+3. Asks your current project mode (`ship`, `solid`, `explore`, `maintain`, `architecture`, `refactor`, `migrate`)
 4. Walks through rules, skills, and commands — surfacing candidates, asking targeted questions
 5. Offers to set up your developer profile (`whoami.md`)
 6. Shows a full diff preview

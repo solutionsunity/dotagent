@@ -21,8 +21,9 @@ Docker, GitHub Actions CI, Conventional Commits in git log.
 User: both
 
 > "What is the current project mode?"
-  [ ] ship     [ ] solid     [ ] explore
-  [ ] maintain [ ] migrate
+  [ ] ship         [ ] solid        [ ] explore
+  [ ] maintain     [ ] architecture [ ] refactor
+  [ ] migrate
 
 User: solid
 

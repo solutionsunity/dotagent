@@ -99,7 +99,9 @@ Project mode affects:
 | `solid` | Correctness first | Raise architecture concerns before writing code. No shortcuts. |
 | `explore` | Understanding over commitment | Propose, don't finalize. Think out loud. Multiple options. |
 | `maintain` | Consistency over cleverness | Existing patterns win. Match the codebase, don't improve it. |
-| `migrate` | Deliberate transition from A to B | Old patterns are known-bad. New pattern is the target. |
+| `architecture` | Docs are the target, code is provisional | Push decisions to documentation before implementation. Treat any code written now as provisional until the doc confirms it. Challenge premature implementation. |
+| `refactor` | Source of truth exists, code catches up | Docs or stated intent are authoritative. Flag code that contradicts them. Restructure toward the known target — for projects without formal docs, ask about intent before restructuring. |
+| `migrate` | Infrastructure or data substrate transition | Platform, schema, or data is moving from A to B. Old substrate is known-bad. Data integrity and continuity are the priority. Not for code architecture or docs — use `refactor` or `architecture` for those. |
 
 Project mode lives in `manifest.yaml` under a `mode` key, with an optional `mode-note` for context the label alone can't carry:
 
@@ -265,8 +267,9 @@ Docker, GitHub Actions CI, Conventional Commits in git log.
 User: both
 
 > "What is the current project mode?"
-  [ ] ship     [ ] solid     [ ] explore
-  [ ] maintain [ ] migrate
+  [ ] ship         [ ] solid        [ ] explore
+  [ ] maintain     [ ] architecture [ ] refactor
+  [ ] migrate
 
 User: solid
 
@@ -744,7 +747,7 @@ The trace is the spec. Write it to be readable by both a human contributor and a
 
 ### Adding a new project mode preset
 
-Project mode presets represent genuinely distinct phase archetypes — not variations of existing ones. New presets should be proposed with a real-world case that demonstrates the existing five don't cover it.
+Project mode presets represent genuinely distinct phase archetypes — not variations of existing ones. New presets should be proposed with a real-world case that demonstrates the existing seven don't cover it.
 
 ### Adding a new rule or skill
 

@@ -26,6 +26,8 @@ Your agent configuration lives in one place — `.dotagent` — and is linked in
 
 `.claude`, `.augment` symlink into `.dotagent`. One source, many targets.
 
+Only `rules/`, `skills/`, and `commands/` are symlinked — not the whole directory. Any agent-specific files you already have (or need to add) sit in `.claude/` or `.augment/` normally alongside the links.
+
 ---
 
 ## Quickstart

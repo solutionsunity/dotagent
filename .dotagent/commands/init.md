@@ -23,7 +23,7 @@ User: both
 > "What is the current project mode?"
   [ ] ship         [ ] solid        [ ] explore
   [ ] maintain     [ ] architecture [ ] refactor
-  [ ] migrate
+  [ ] migrate      [ ] scoped
 
 User: solid
 

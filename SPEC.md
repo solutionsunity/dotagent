@@ -247,6 +247,33 @@ The `agents` list gates everything downstream — which directories get created,
 
 All paths in the manifest are relative to the repository root.
 
+### Scoped Mode
+
+For repositories where a single project mode cannot apply globally — module collections,
+monorepos, or any codebase where different parts are in genuinely different phases — set
+`mode: scoped` in the manifest.
+
+```yaml
+mode: scoped
+mode-note: >
+  Odoo module repo. Each module has its own development phase.
+  Establish which module and its current mode at session start.
+```
+
+`scoped` is not a project phase — it is a meta-instruction about how phases apply in
+this repo. When the agent sees `mode: scoped`, it establishes scope and mode at the
+start of every session before doing any work:
+
+> "Which module (or part of the codebase) are we working in today, and what mode is it in?"
+
+The answer becomes the operative mode for that session. The agent holds the session mode
+exactly as it would hold a globally declared mode — same behavioral effects, same
+composition with user mode, same depth of application. The difference is that it is
+session-declared rather than manifest-declared.
+
+`scoped` is not listed in the project mode presets table. It does not describe an
+optimization target. It describes the structure of how modes are applied in this repo.
+
 ---
 
 ## 7. Commands Reference
@@ -269,7 +296,7 @@ User: both
 > "What is the current project mode?"
   [ ] ship         [ ] solid        [ ] explore
   [ ] maintain     [ ] architecture [ ] refactor
-  [ ] migrate
+  [ ] migrate      [ ] scoped
 
 User: solid
 

@@ -35,11 +35,11 @@ Only `rules/`, `skills/`, and `commands/` are symlinked — not the whole direct
 Open your AI agent in your project directory and paste this prompt:
 
 ```
-Read https://raw.githubusercontent.com/solutionsunity/dotagent/main/SPEC.md
+Read https://raw.githubusercontent.com/solutionsunity/dotagent/main/.dotagent/commands/init.md
 then run /init for this workspace.
 ```
 
-The agent reads the spec, understands the format, and walks you through initialization.
+The agent reads the init command, understands the format, and walks you through initialization.
 Your `.dotagent/` is built from the conversation — nothing to clone, nothing to install.
 The prompt is the bootstrap.
 

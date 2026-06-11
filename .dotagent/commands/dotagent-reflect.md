@@ -3,7 +3,7 @@ description: Run the reflection prompt against the current conversation and offe
 tags: [reflect, profile, calibration]
 ---
 
-# /reflect
+# /dotagent-reflect
 
 Runs the reflection prompt against the current conversation and surfaces profile
 fragments — things the agent learned about how the developer thinks, what they value,
@@ -13,7 +13,7 @@ what they reject, or how they work. Offers to append the output directly to
 ## Trace
 
 ```
-/reflect
+/dotagent-reflect
 
 Agent reviews the conversation and surfaces profile fragments:
 
@@ -51,12 +51,10 @@ filters out noise and surfaces only the priors that actually matter.
 
 ## Notes
 
-- Run `/reflect` after conversations where something was corrected, rejected, or
+- Run `/dotagent-reflect` after conversations where something was corrected, rejected, or
   reframed. Smooth conversations reveal almost nothing. Friction is the signal.
 - The underlying prompt is agent-agnostic. It works in Claude, Augment, or any LLM
   interface — no dotagent infrastructure required. The practice is the value; the
   command is a convenience.
-- If `profile/` exists, the developer may prefer to drop the fragment there and run
-  `/sync` to regenerate `rules/whoami.md`. Both paths are valid.
-- `/reflect` does not overwrite existing profile content. It appends. The developer
+- `/dotagent-reflect` does not overwrite existing profile content. It appends. The developer
   reviews before anything is written.

@@ -60,9 +60,9 @@ manifest-declared.
 
 **Can I switch modes mid-project?**
 
-Yes — that is what `/adapt` is for. Run it when the project phase changes. It surfaces
-stale rules or skills and asks you to confirm the current mode. The agent's behavior
-shifts as soon as the manifest is updated.
+Yes — run `/dotagent-apply`. It detects drift, surfaces stale rules or skills, and asks
+you to confirm the current mode. The agent's behavior shifts as soon as the manifest is
+updated.
 
 ---
 
@@ -85,9 +85,9 @@ is built from the conversation.
 
 ---
 
-**I already have a `.claude/` directory. Will `/init` overwrite it?**
+**I already have a `.claude/` directory. Will `/dotagent-apply` overwrite it?**
 
-No. `/init` detects existing config and offers two choices: Adopt (wrap it without moving
+No. `/dotagent-apply` detects existing config and offers two choices: Adopt (wrap it without moving
 anything) or Migrate (move it into `.dotagent/` with managed symlinks). Both are complete
 outcomes — no half-states, no per-file deferral.
 

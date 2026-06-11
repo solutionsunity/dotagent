@@ -35,8 +35,8 @@ Only `rules/`, `skills/`, and `commands/` are symlinked — not the whole direct
 Open your AI agent in your project directory and paste this prompt:
 
 ```
-Read https://raw.githubusercontent.com/solutionsunity/dotagent/main/.dotagent/commands/init.md
-then run /init for this workspace.
+Read https://raw.githubusercontent.com/solutionsunity/dotagent/main/.dotagent/commands/dotagent-apply.md
+then run /dotagent-apply for this workspace.
 ```
 
 The agent reads the init command, understands the format, and walks you through initialization.
@@ -45,17 +45,13 @@ The prompt is the bootstrap.
 
 ---
 
-## What `/init` Does
+## What `/dotagent-apply` Does
 
-1. Detects your stack, frameworks, CI, existing config
-2. Asks which AI agents you use — gates everything downstream
-3. Asks your current project mode (`ship`, `solid`, `explore`, `maintain`, `architecture`, `refactor`, `migrate`)
-4. Walks through rules, skills, and commands — surfacing candidates, asking targeted questions
-5. Offers to set up your developer profile (`whoami.md`)
-6. Shows a full diff preview
-7. Writes only on confirmation
+On a **new workspace**: detects your stack, asks which agents and mode, walks through rules, skills, and commands, offers profile setup, shows a full diff, writes only on confirmation.
 
-**Existing `.claude` or `.augment`?** `/init` detects it and offers two choices: adopt (wrap without moving anything) or migrate (full ownership transfer). No half-states.
+On an **existing workspace**: detects drift between what your rules and skills assume and what is actually true today, surfaces deltas, confirms before writing. Also the right command when the project mode changes phase.
+
+**Existing `.claude` or `.augment`?** `/dotagent-apply` detects it and offers two choices: adopt (wrap without moving anything) or migrate (full ownership transfer). No half-states.
 
 ---
 
@@ -63,15 +59,12 @@ The prompt is the bootstrap.
 
 | Command | What it does |
 |---------|-------------|
-| `/init` | Initialize `.dotagent` for a workspace |
-| `/init --template` | Build a shareable stack template |
-| `/sync` | Re-run linking, regenerate derived files |
-| `/adapt` | Detect and resolve workspace drift |
-| `/whoami` | Set up or update your developer profile |
-| `/reflect` | Extract profile fragments from the current conversation |
-| `/add skill <name>` | Scaffold a new skill interactively |
-| `/add rule <name>` | Scaffold a new rule interactively |
-| `/pull` | Pull updates from upstream source *(future)* |
+| `/dotagent-apply` | Set up a new workspace or detect and resolve drift on an existing one |
+| `/dotagent-apply --template` | Build a shareable stack template |
+| `/dotagent-link` | Create or repair symlinks from `.dotagent/` into agent directories |
+| `/dotagent-whoami` | Set up or update your developer profile |
+| `/dotagent-reflect` | Extract profile fragments from the current conversation |
+
 
 ---
 
@@ -79,7 +72,7 @@ The prompt is the bootstrap.
 
 dotagent introduces two modes the agent holds simultaneously:
 
-**Project mode** — the current phase and optimization target of the project. Set in `manifest.yaml`, updated via `/adapt`.
+**Project mode** — the current phase and optimization target of the project. Set in `manifest.yaml`, updated via `/dotagent-apply`.
 
 **User mode** — who you are and how to work with you. Lives in `.dotagent/rules/whoami.md`, always loaded as an always-on rule.
 
@@ -95,9 +88,9 @@ See [SPEC.md](SPEC.md) for the full mental modes design.
 
 Build it two ways:
 
-**`/whoami`** — set up from a preset (`architect`, `pragmatist`, `explorer`, `learner`) then answer targeted questions.
+**`/dotagent-whoami`** — set up from a preset (`architect`, `pragmatist`, `explorer`, `learner`) then answer targeted questions.
 
-**`/reflect`** — run this at the end of any conversation where something was corrected, rejected, or reframed. The agent surfaces what it learned about you and appends it directly to `whoami.md`.
+**`/dotagent-reflect`** — run this at the end of any conversation where something was corrected, rejected, or reframed. The agent surfaces what it learned about you and appends it directly to `whoami.md`.
 
 > Smooth conversations reveal almost nothing. Friction is the signal. Correction, rejection, reframing — these are the profile building blocks.
 

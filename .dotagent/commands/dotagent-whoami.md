@@ -3,17 +3,17 @@ description: Set up or update rules/whoami.md. Starts from a preset, asks target
 tags: [whoami, identity, setup]
 ---
 
-# /whoami
+# /dotagent-whoami
 
 Sets up or updates the developer profile. Can be run standalone at any time, or is
-invoked automatically during `/init` when no profile exists. Starts from a preset
+invoked automatically during `/dotagent-apply` when no profile exists. Starts from a preset
 starting point, then asks targeted questions to move from preset shape to personal
 substance.
 
 ## Trace
 
 ```
-/whoami
+/dotagent-whoami
 
 > "Starting from a preset or from scratch?"
   [ ] explorer   [ ] pragmatist   [ ] architect
@@ -49,10 +49,7 @@ User: yes
 - Presets are starting points only — they seed the shape of the profile. The developer
   authors the substance. A real profile is a calibration document, not a preference list.
 - The most accurate profile does not come from answering abstract setup questions — it
-  comes from real interactions. Use `/reflect` after real conversations to build on what
-  `/whoami` seeds.
-- If `profile/` directory exists, `/whoami` may write there instead and prompt the
-  developer to run `/sync` to regenerate `rules/whoami.md`. If it doesn't exist, the
-  rule is written directly.
-- `/whoami` never overwrites an existing `rules/whoami.md` without showing a diff and
+  comes from real interactions. Use `/dotagent-reflect` after real conversations to build on what
+  `/dotagent-whoami` seeds.
+- `/dotagent-whoami` never overwrites an existing `rules/whoami.md` without showing a diff and
   asking for confirmation. The confirmation contract is `[yes / no / edit]`.

@@ -30,7 +30,7 @@ This is a deliberate scope decision, not a limitation. The AI agent landscape is
   manifest.yaml   # Active targets, project mode, and linking behavior
 ```
 
-After `/init` or `/sync` runs, the repo also contains:
+After `/dotagent-apply` or `/dotagent-link` runs, the repo also contains:
 
 ```
 .claude/          # Symlinked entries pointing into .dotagent
@@ -113,7 +113,7 @@ mode-note: >
   the next planning cycle.
 ```
 
-`/adapt` can update the mode when the project phase changes — it asks the developer to confirm the current mode as part of any adaptation pass.
+`/dotagent-apply` can update the mode when the project phase changes — it asks the developer to confirm the current mode as part of any adaptation pass.
 
 ---
 
@@ -178,7 +178,7 @@ Eventually, if maintaining the
 
 ### 5.2 Building the Profile
 
-`/whoami` sets up the initial profile from a preset starting point and targeted questions. But the most accurate profile doesn't come from answering abstract setup questions — it comes from real interactions that reveal real priors.
+`/dotagent-whoami` sets up the initial profile from a preset starting point and targeted questions. But the most accurate profile doesn't come from answering abstract setup questions — it comes from real interactions that reveal real priors.
 
 **The reflection prompt** is the mechanism for this. At the end of any conversation with any AI agent — chat, CLI, code editor — the developer runs:
 
@@ -190,12 +190,12 @@ Over time the profile becomes genuinely accurate because it is built from intera
 
 This prompt is agent-agnostic. It works in Claude chat, Claude Code, Augment, any LLM interface. It is not tied to `dotagent` infrastructure — it is a practice.
 
-### 5.3 The `/reflect` Command
+### 5.3 The `/dotagent-reflect` Command
 
-`/reflect` formalizes the reflection prompt inside supported agents. It runs the prompt against the current conversation, formats the output as a profile fragment, and offers to append it to `rules/whoami.md` directly.
+`/dotagent-reflect` formalizes the reflection prompt inside supported agents. It runs the prompt against the current conversation, formats the output as a profile fragment, and offers to append it to `rules/whoami.md` directly.
 
 ```
-/reflect
+/dotagent-reflect
 
 Agent reviews the conversation and surfaces profile fragments:
 
@@ -212,7 +212,7 @@ Agent reviews the conversation and surfaces profile fragments:
 > "Add these to rules/whoami.md? [yes / no / edit]"
 ```
 
-`/reflect` is the feedback loop that keeps the profile alive across the natural evolution of how a developer thinks and works.
+`/dotagent-reflect` is the feedback loop that keeps the profile alive across the natural evolution of how a developer thinks and works.
 
 ---
 
@@ -222,7 +222,7 @@ Agent reviews the conversation and surfaces profile fragments:
 
 ```yaml
 version: 1
-source: github.com/acme/dotagent-nestjs   # optional, for /pull
+source: github.com/acme/dotagent-nestjs   # optional
 
 agents:
   - claude
@@ -243,7 +243,7 @@ targets:
     skills:   .dotagent/skills
 ```
 
-The `agents` list gates everything downstream — which directories get created, which questions are asked during init. `/sync` and `/adapt` always read from this list so active targets are never ambiguous.
+The `agents` list gates everything downstream — which directories get created, which questions are asked during apply. `/dotagent-link` and `/dotagent-apply` always read from this list so active targets are never ambiguous.
 
 All paths in the manifest are relative to the repository root.
 
@@ -278,15 +278,21 @@ optimization target. It describes the structure of how modes are applied in this
 
 ## 7. Commands Reference
 
-### `/init`
+### `/dotagent-apply`
 
-Initializes the `.dotagent` directory for a workspace. The agent analyzes the repo first, then asks a minimal targeted set of questions before writing anything. Agent and mode selection happen first — they gate all downstream questions.
+Brings the workspace to a correctly configured state. On a new workspace, runs full
+setup: analyzes the repo, asks targeted questions, and writes rules, skills, commands,
+and links. On an existing workspace, detects drift between what rules and skills assume
+and what is actually true today, and resolves it. Idempotent — safe to run at any time.
 
-**Trace — existing NestJS project:**
+**Trace — new workspace (NestJS project):**
 
 ```
+/dotagent-apply
+
 Agent scans the repo silently. Detects: TypeScript, NestJS, Jest,
 Docker, GitHub Actions CI, Conventional Commits in git log.
+No manifest.yaml found — full setup mode.
 
 > "Which AI agents are you using in this workspace?"
   [ ] Claude   [ ] Augment   (select all that apply)
@@ -334,7 +340,7 @@ User: yes — /create-feature, branch naming and PR template
 Agent scaffolds /create-feature and asks two targeted questions.
 
 --- Profile ---
-> "No user profile found. Run /whoami now to set one up,
+> "No user profile found. Run /dotagent-whoami now to set one up,
   or skip and add it later? [setup / skip]"
 
 User: skip
@@ -362,11 +368,10 @@ Agent shows a full diff preview:
 
 ---
 
-### `/init` Migration Cases
+**Existing config detection:**
 
-When `/init` runs in a repo that already has agent configuration, it performs a silent detection pass before asking anything. What it finds determines which branch the conversation takes.
-
-**Detection pass — what `/init` looks for:**
+When `/dotagent-apply` runs in a repo that has agent config but no `.dotagent/`, it
+performs a silent detection pass before asking anything:
 
 ```
 Case A — Hand-rolled .claude/ or .augment/
@@ -379,30 +384,17 @@ Case B — Foreign symlink structure
 
 Case C — Partial dotagent
   .dotagent/ exists, manifest may exist, something is
-  incomplete or stale. Resume rather than reinitialize.
+  incomplete or stale. Treated as existing workspace —
+  drift mode runs, not full setup.
 
 Case D — Greenfield
-  Nothing exists. Original init flow, no migration needed.
+  Nothing exists. Full setup flow.
 ```
 
-For Cases A and B, `/init` always describes what it found before asking anything, then presents a single binary choice:
-
-```
-> "Found existing .claude/ with 4 rules and 2 skill files.
-
-  [ ] Adopt — keep the existing structure, layer dotagent on top.
-      .dotagent/ becomes the manifest and symlinks point to
-      what is already here. No files moved or renamed.
-
-  [ ] Migrate — move everything into .dotagent/, replace .claude/
-      with dotagent-managed symlinks. dotagent takes full ownership."
-```
-
-**Adopt** means dotagent wraps the existing structure without touching it. The developer keeps familiar paths; dotagent becomes the source of truth going forward.
-
-**Migrate** means a clean cut. Files move, symlinks replace originals, manifest written fresh.
-
-Both are complete outcomes. No half-states, no "review each file" deferred decisions — those produce half-migrated repos that never get finished.
+For Cases A and B, `/dotagent-apply` describes what it found, then presents one binary
+choice: **Adopt** (wrap existing structure without touching it) or **Migrate** (move files
+into `.dotagent/`, replace originals with managed symlinks). Both are complete outcomes —
+no half-states, no deferred per-file decisions.
 
 **Trace — Case A, hand-rolled .claude/:**
 
@@ -439,19 +431,26 @@ Agent moves files, writes manifest.yaml, creates symlinks,
 shows final diff before writing.
 ```
 
-> **Edge case — Foreign symlink + Adopt:** When adopting a foreign symlink structure, dotagent's manifest points to paths it didn't create and doesn't own. dotagent tracks them but changes at those locations won't be visible to `/sync` automatically.
+> **Edge case — Foreign symlink + Adopt:** When adopting a foreign symlink structure,
+> dotagent's manifest points to paths it didn't create and doesn't own. dotagent tracks
+> them but changes at those locations won't be visible to `/dotagent-link` automatically.
 >
-> **TBD:** Define the exact behavior of `/sync` and `/adapt` when manifest contains adopted foreign paths — whether to warn, skip, or follow the symlink and inspect the target.
+> **TBD:** Define the exact behavior of `/dotagent-link` and `/dotagent-apply` when
+> manifest contains adopted foreign paths — whether to warn, skip, or follow the symlink
+> and inspect the target.
 
 ---
 
-### `/init --template`
+### `/dotagent-apply --template`
 
-Flips the init flow from introspective to prescriptive. Used by architects, tech leads, or open-source maintainers building a reusable starting point.
+Flips the setup flow from introspective to prescriptive. Used by architects, tech leads,
+or open-source maintainers building a reusable starting point.
 
 **Trace — NestJS microservice template:**
 
 ```
+/dotagent-apply --template
+
 Agent detects an empty or near-empty repository.
 
 > "Which AI agents should this template support?"
@@ -481,23 +480,22 @@ writes on confirm.
 
 ---
 
-### `/sync`
+### `/dotagent-link`
 
-Re-runs the linking step and regenerates derived files. Reads active targets from `manifest.yaml`. Safe to run any time.
-
-If
+Creates or repairs symlinks from `.dotagent/` into each active agent's expected
+directory. Reads active agents and targets from `manifest.yaml`. Safe to run at any
+time — it checks current state before acting and only creates what is missing.
 
 ```
-/sync
+/dotagent-link
 
   Reading manifest.yaml — agents: claude, augment — mode: solid
 
-  rules/whoami.md                         ✓ up to date
-
-  .claude/rules    →  .dotagent/rules           ✓ exists
-  .claude/skills   →  .dotagent/skills          ✗ missing — created
-  .augment/rules   →  .dotagent/rules           ✓ exists
-  .augment/skills  →  .dotagent/skills          ✓ exists
+  .claude/rules    →  .dotagent/rules     ✓ exists
+  .claude/skills   →  .dotagent/skills    ✗ missing — created
+  .claude/commands →  .dotagent/commands  ✓ exists
+  .augment/rules   →  .dotagent/rules     ✓ exists
+  .augment/skills  →  .dotagent/skills    ✓ exists
 
   Done. 1 link created.
 ```
@@ -511,13 +509,13 @@ If
 | Windows  | Directory junctions | No elevation required; directory-level links |
 | Windows  | `.lnk` shortcuts | File-level links where junctions don't apply |
 
-**Copy fallback:** In rare environments where linking fails, `/sync` stops and asks explicitly:
+**Copy fallback:** In rare environments where linking fails, `/dotagent-link` stops and asks explicitly:
 
 ```
   Linking failed — symlinks not supported in this environment.
 
   Copy mode available as fallback. Files will be copied instead
-  of linked. Changes to .dotagent require re-running /sync
+  of linked. Changes to .dotagent require re-running /dotagent-link
   to propagate.
 
   Which agents should copy mode apply to?
@@ -530,51 +528,12 @@ Copy mode is never automatic. The developer decides scope explicitly.
 
 ---
 
-### `/adapt`
+### `/dotagent-whoami`
 
-Re-studies the workspace and identifies drift between what rules/skills currently assume and what is actually true today. Does not rebuild — only surfaces and resolves deltas. Also the right command to run when the project mode changes phase.
-
-**Trace — Odoo install path drift + mode change:**
+Sets up or updates the developer profile. Can be run standalone or is invoked automatically during `/dotagent-apply` when no profile exists.
 
 ```
-Agent scans the workspace. Compares current state against
-assumptions in existing rules and skills.
-
-  Checking rules...
-  ✗ rules/odoo-paths.md references /opt/odoo — not found
-    Detected Odoo at /usr/lib/python3/dist-packages/odoo
-
-  Checking skills...
-  ✗ skills/run-tests.md references `python /opt/odoo/odoo-bin`
-    Likely needs update to match new install path
-
-  ✓ skills/deploy.md — no path assumptions, looks current
-
-> "Found 2 items that reference the old Odoo path. Update them
-  to /usr/lib/python3/dist-packages/odoo? [yes / no / review each]"
-
-User: review each
-
-Agent walks each delta, shows the specific line, proposes the
-update, waits for confirmation before writing.
-
-> "Current project mode is `ship`. Still accurate?"
-User: no — switching to solid now
-
-> "Any context for the change? (optional)"
-User: post-launch stability phase
-
-Agent updates manifest.yaml mode and mode-note.
-```
-
----
-
-### `/whoami`
-
-Sets up or updates the developer profile. Can be run standalone or is invoked automatically during `/init` when no profile exists.
-
-```
-/whoami
+/dotagent-whoami
 
 > "Starting from a preset or from scratch?"
   [ ] explorer   [ ] pragmatist   [ ] architect
@@ -601,7 +560,7 @@ preview before writing.
 
 ---
 
-### `/reflect`
+### `/dotagent-reflect`
 
 Runs the reflection prompt against the current conversation and offers to append the output directly to `rules/whoami.md`. The mechanism for keeping the profile accurate over time.
 
@@ -610,7 +569,7 @@ The underlying prompt — usable in any AI agent, with or without `dotagent`:
 > *"Looking at this entire conversation: what did you learn about how I think, what I value, what I reject, or how I work — that if you had known at the start would have changed your first response? Format it as a profile fragment I can add to my working context."*
 
 ```
-/reflect
+/dotagent-reflect
 
 Agent reviews the conversation and surfaces profile fragments:
 
@@ -627,11 +586,11 @@ Agent reviews the conversation and surfaces profile fragments:
 > "Add these to rules/whoami.md? [yes / no / edit]"
 ```
 
-`/reflect` is agent-aware but the prompt itself is not. It works in any LLM interface. The practice is the value; the command is a convenience.
+`/dotagent-reflect` is agent-aware but the prompt itself is not. It works in any LLM interface. The practice is the value; the command is a convenience.
 
 ---
 
-> ## 🔑 The Best Time to Run `/reflect`
+> ## 🔑 The Best Time to Run `/dotagent-reflect`
 >
 > **Run it after a conversation where something was corrected, rejected, or reframed.**
 >
@@ -640,7 +599,7 @@ Agent reviews the conversation and surfaces profile fragments:
 > rejected a proposal, or redirected the agent — that is where your priors live.
 >
 > A setup questionnaire asks you to describe yourself in the abstract.
-> `/reflect` watches you work and describes what it saw.
+> `/dotagent-reflect` watches you work and describes what it saw.
 > **The second one is always more accurate.**
 >
 > Correction, rejection, reframing — these are not failures in a conversation.
@@ -648,44 +607,16 @@ Agent reviews the conversation and surfaces profile fragments:
 
 ---
 
-### `/add skill <name>`
+## 8. Apply Flow
 
-Scaffolds a new skill file interactively. The agent asks targeted questions, writes the file, and shows a preview before saving.
-
-```
-/add skill migrate-database
-
-> "What does this skill do?"
-User: runs pending migrations and prints a summary
-
-> "How is it triggered in this repo?"
-User: `npm run db:migrate`
-
-> "Any preconditions?"
-User: requires DATABASE_URL to be set
-
-Agent previews .dotagent/skills/migrate-database.md — writes on confirm.
-```
-
-**Notes:** If a file with the same name already exists, `/add` stops and asks before overwriting — it never silently replaces existing config.
-
----
-
-### `/pull` *(future)*
-
-Updates rules and skills from the `source` defined in `manifest.yaml`. Pulls from the upstream GitHub repo, shows a diff, and lets the developer accept, reject, or partially apply changes. Treats agent config as a managed dependency.
-
----
-
-## 8. Init Flow
-
-`/init` follows a consistent sequence regardless of workspace type:
+`/dotagent-apply` follows a consistent sequence on a new workspace:
 
 ```
 1. ANALYZE        Agent reads the workspace silently.
                   Stack, frameworks, test setup, CI, git history,
                   existing config files, Makefile/scripts, install
                   paths, environment assumptions.
+                  If manifest.yaml is found — switches to drift mode.
 
 2. AGENTS         First question, always.
                   "Which AI agents are you using in this workspace?"
@@ -718,7 +649,7 @@ Updates rules and skills from the `source` defined in `manifest.yaml`. Pulls fro
                   Emerges from rules and skills already defined.
                   Commands are interfaces that compose primitives.
 
-8. PROFILE        If no profile exists, offer to run /whoami.
+8. PROFILE        If no profile exists, offer to run /dotagent-whoami.
                   If profile exists, verify rules/whoami.md
                   is current.
 
@@ -742,7 +673,7 @@ When a new agent becomes worth supporting:
 1. Research the agent's expected directory structure and file format requirements
 2. Add the target mapping to `manifest.yaml` under `targets`
 3. If the agent requires frontmatter fields beyond the current set, document them
-4. Run `/sync` to create and verify the new links
+4. Run `/dotagent-link` to create and verify the new links
 5. Open a PR with findings on format, limitations, and any manifest changes
 
 ### Adding a new command
@@ -778,7 +709,7 @@ Project mode presets represent genuinely distinct phase archetypes — not varia
 
 ### Adding a new rule or skill
 
-Use `/add skill <name>` or `/add rule <name>` — the agent scaffolds the file interactively and places it in the correct directory with frontmatter included.
+Ask the agent directly — describe what the rule or skill should do and it will create the file in the correct directory with proper frontmatter. The format is documented in section 3.
 
 ---
 
@@ -828,7 +759,7 @@ examples/
 
 > **Atomic examples are ingredients. Workspace examples are meals.** Both are useful, neither replaces the other. An atomic skill can be pulled into any workspace. A workspace example gives you a running start on a known stack without assembling from scratch.
 
-`/init --template` naturally offers: *"Start from a workspace example or build from scratch?"* — making the examples directory a first-class input to the init flow, not just a reference.
+`/dotagent-apply --template` naturally offers: *"Start from a workspace example or build from scratch?"* — making the examples directory a first-class input to the apply flow, not just a reference.
 
 ---
 
@@ -846,7 +777,7 @@ Community workspaces live in **forks, not branches**. The distinction matters:
 
 A branch implies the maintainer owns that content. A fork means the contributor owns it — their repo, their name, their issue tracker, their release cycle. They get full credit and full control. The main repo stays clean.
 
-Community forks retain the ability to `/pull` from the base dotagent repo as the standard evolves. They diverge where their stack demands it. The relationship is: **dotagent is the reference implementation and standard. Community forks are applications of that standard.**
+Community forks diverge where their stack demands it. The relationship is: **dotagent is the reference implementation and standard. Community forks are applications of that standard.**
 
 ### `COMMUNITY.md`
 
@@ -882,13 +813,11 @@ dotagent/
     rules/
       whoami.md                   # maintainer profile
     commands/
-      init.md
-      sync.md
-      adapt.md
-      reflect.md
-      whoami.md
-      add.md
-      pull.md                     # future — stub only
+      dotagent-apply.md
+      dotagent-link.md
+      dotagent-reflect.md
+      dotagent-whoami.md
+
     manifest.yaml
 
   examples/
@@ -912,7 +841,7 @@ dotagent/
 **Bootstrap:**
 
 There is nothing to install. The developer pastes a single prompt into their AI agent
-pointing to `.dotagent/commands/init.md`. The agent reads the init command and walks
+pointing to `.dotagent/commands/dotagent-apply.md`. The agent reads the apply command and walks
 through initialization. The workspace `.dotagent/` is built from the conversation — no
 cloning, no root bootstrap files required.
 
@@ -924,4 +853,4 @@ The repo eats its own food. The commands that define how dotagent works are writ
 
 `SPEC.md` is the concept and design document. It is the reference the agent reads when it needs to understand the intent behind a decision. It is not the README — the README is how-to. The SPEC is why.
 
-`examples/workspaces/` starts empty. It is populated only by real runs — never by invented configs. The first workspace example is the one that comes from actually running `/init` on a real project and committing the output.
+`examples/workspaces/` starts empty. It is populated only by real runs — never by invented configs. The first workspace example is the one that comes from actually running `/dotagent-apply` on a real project and committing the output.

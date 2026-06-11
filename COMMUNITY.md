@@ -32,8 +32,8 @@ Community workspaces live in **forks, not branches**. A fork means you own it â€
 repo, your name, your issue tracker, your release cycle. You get full credit and full
 control. The main repo stays clean.
 
-Community forks retain the ability to `/pull` from the base dotagent repo as the
-standard evolves. They diverge where their stack demands it.
+Community forks can pull updates from the base dotagent repo as the standard evolves.
+They diverge where their stack demands it.
 
 **dotagent is the reference implementation and standard. Community forks are
 applications of that standard.**
